@@ -55,3 +55,43 @@
 .hover-scale {
   @apply transition-transform duration-200 hover:scale-[1.02];
 }
+
+/* Background grid pattern */
+.bg-grid-slate-200 {
+  background-image: linear-gradient(to right, #e2e8f0 1px, transparent 1px),
+    linear-gradient(to bottom, #e2e8f0 1px, transparent 1px);
+  background-size: 24px 24px;
+}
+
+/* Enhanced animations */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Card hover effects */
+.card-hover {
+  @apply transition-all duration-300 hover:shadow-lg hover:scale-[1.02] hover:bg-white/95;
+}
+
+/* Input focus effects */
+.input-focus {
+  @apply transition-all duration-200 focus:ring-2 focus:ring-primary/20;
+}
