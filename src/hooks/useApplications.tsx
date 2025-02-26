@@ -42,7 +42,14 @@ export function useApplications() {
           .order("created_at", { ascending: false });
 
         if (error) throw error;
-        setApplications(data);
+
+        // Type cast the data to ensure status is of the correct type
+        const typedData = data?.map(app => ({
+          ...app,
+          status: app.status as "applied" | "interview" | "rejected"
+        })) as Application[];
+
+        setApplications(typedData);
       } catch (err) {
         console.error("Error fetching applications:", err);
         setError(err instanceof Error ? err.message : "Failed to fetch applications");
@@ -90,7 +97,7 @@ export function useApplications() {
             job_id: jobId,
             user_id: user.id,
             notes,
-            status: "applied",
+            status: "applied" as const,
           },
         ])
         .select()
