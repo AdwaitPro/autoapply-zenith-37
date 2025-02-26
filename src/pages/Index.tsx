@@ -3,6 +3,7 @@ import { Header } from "@/components/Header";
 import { ProfileSetup } from "@/components/ProfileSetup";
 import { JobSearch } from "@/components/JobSearch";
 import { ApplicationTracker } from "@/components/ApplicationTracker";
+import { Card } from "@/components/ui/card";
 
 const Index = () => {
   return (
