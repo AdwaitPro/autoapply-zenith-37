@@ -1,7 +1,8 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { useNavigate } from "react-router-dom";
 import {
   Search,
   FileText,
@@ -15,31 +16,65 @@ const steps = [
     title: "Complete Your Profile",
     description: "Add your professional information and skills to stand out.",
     icon: UserCircle,
+    path: "/profile",
+    storageKey: "profileCompleted",
   },
   {
     title: "Upload Your Resume",
     description: "Upload your resume to automatically fill your profile.",
     icon: FileText,
+    path: "/resume",
+    storageKey: "resumeUploaded",
   },
   {
     title: "Search Jobs",
     description: "Browse through job listings that match your skills.",
     icon: Search,
+    path: "/jobs",
+    storageKey: "jobsSearched",
   },
   {
     title: "Apply to Jobs",
     description: "Submit applications to positions you're interested in.",
     icon: Send,
+    path: "/apply",
+    storageKey: "jobsApplied",
   },
   {
     title: "Track Applications",
     description: "Monitor your application status and follow up.",
     icon: CheckCircle,
+    path: "/applications",
+    storageKey: "applicationsTracked",
   },
 ];
 
 export const OnboardingGuide = () => {
   const [currentStep, setCurrentStep] = useState(0);
+  const [completedSteps, setCompletedSteps] = useState<string[]>([]);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    // Load completed steps from localStorage
+    const completed = steps
+      .filter(step => localStorage.getItem(step.storageKey) === "true")
+      .map(step => step.storageKey);
+    setCompletedSteps(completed);
+  }, []);
+
+  const handleStepClick = (index: number) => {
+    const step = steps[index];
+    navigate(step.path);
+  };
+
+  const isStepCompleted = (storageKey: string) => {
+    return completedSteps.includes(storageKey);
+  };
+
+  // If all steps are completed, don't show the guide
+  if (completedSteps.length === steps.length) {
+    return null;
+  }
 
   return (
     <Card className="p-6 animate-in slide-in">
@@ -47,19 +82,20 @@ export const OnboardingGuide = () => {
       <div className="space-y-6">
         {steps.map((step, index) => {
           const Icon = step.icon;
+          const completed = isStepCompleted(step.storageKey);
           return (
             <div
               key={index}
               className={`flex items-start space-x-4 p-4 rounded-lg transition-all duration-300 ${
-                currentStep === index
-                  ? "bg-primary/5 scale-[1.02]"
-                  : "hover:bg-gray-50"
-              }`}
-              onClick={() => setCurrentStep(index)}
+                !completed ? "cursor-pointer hover:bg-gray-50" : "bg-success/5"
+              } ${currentStep === index ? "bg-primary/5 scale-[1.02]" : ""}`}
+              onClick={() => !completed && handleStepClick(index)}
             >
               <div
                 className={`p-2 rounded-full ${
-                  currentStep === index
+                  completed
+                    ? "bg-success/10 text-success"
+                    : currentStep === index
                     ? "bg-primary/10 text-primary"
                     : "bg-gray-100 text-gray-500"
                 }`}
@@ -70,24 +106,12 @@ export const OnboardingGuide = () => {
                 <h3 className="font-medium mb-1">{step.title}</h3>
                 <p className="text-sm text-gray-500">{step.description}</p>
               </div>
-              {index < currentStep && (
-                <CheckCircle className="w-5 h-5 text-green-500" />
+              {completed && (
+                <CheckCircle className="w-5 h-5 text-success" />
               )}
             </div>
           );
         })}
-      </div>
-      <div className="mt-6 flex justify-end">
-        <Button
-          onClick={() => {
-            if (currentStep < steps.length - 1) {
-              setCurrentStep(currentStep + 1);
-            }
-          }}
-          disabled={currentStep === steps.length - 1}
-        >
-          {currentStep === steps.length - 1 ? "All set!" : "Next step"}
-        </Button>
       </div>
     </Card>
   );
