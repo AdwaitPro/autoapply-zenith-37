@@ -7,7 +7,11 @@ import { useToast } from "@/components/ui/use-toast";
 import { useNavigate } from "react-router-dom";
 import { LockIcon, MailIcon, UserIcon, GithubIcon, LogInIcon } from "lucide-react";
 
-export const AuthPage = () => {
+interface AuthPageProps {
+  setAuth: (value: boolean) => void;
+}
+
+export const AuthPage = ({ setAuth }: AuthPageProps) => {
   const [isLogin, setIsLogin] = useState(true);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -22,6 +26,7 @@ export const AuthPage = () => {
       title: isLogin ? "Welcome back!" : "Account created successfully!",
       description: "Redirecting to dashboard...",
     });
+    setAuth(true); // Set authentication state
     setTimeout(() => navigate("/"), 1500);
   };
 
