@@ -9,7 +9,48 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      [_ in never]: never
+      jobs: {
+        Row: {
+          company: string
+          created_at: string | null
+          description: string
+          id: string
+          location: string
+          requirements: string[]
+          salary_max: number | null
+          salary_min: number | null
+          title: string
+          type: Database["public"]["Enums"]["job_type"]
+          updated_at: string | null
+        }
+        Insert: {
+          company: string
+          created_at?: string | null
+          description: string
+          id?: string
+          location: string
+          requirements: string[]
+          salary_max?: number | null
+          salary_min?: number | null
+          title: string
+          type: Database["public"]["Enums"]["job_type"]
+          updated_at?: string | null
+        }
+        Update: {
+          company?: string
+          created_at?: string | null
+          description?: string
+          id?: string
+          location?: string
+          requirements?: string[]
+          salary_max?: number | null
+          salary_min?: number | null
+          title?: string
+          type?: Database["public"]["Enums"]["job_type"]
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
@@ -18,7 +59,7 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
-      [_ in never]: never
+      job_type: "Full-time" | "Part-time" | "Contract" | "Internship" | "Remote"
     }
     CompositeTypes: {
       [_ in never]: never

@@ -5,63 +5,40 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
 import { useNavigate } from "react-router-dom";
-import { Search, Building2Icon, MapPinIcon, BriefcaseIcon, CheckCircle } from "lucide-react";
+import { Search, Building2Icon, MapPinIcon, BriefcaseIcon } from "lucide-react";
 import { Header } from "@/components/Header";
-
-interface Job {
-  id: number;
-  title: string;
-  company: string;
-  location: string;
-  type: string;
-  salary: string;
-  matchScore: number;
-}
+import { useJobs } from "@/hooks/useJobs";
+import { Skeleton } from "@/components/ui/skeleton";
 
 const Jobs = () => {
   const [searchQuery, setSearchQuery] = useState("");
+  const { jobs, isLoading, error } = useJobs(searchQuery);
   const { toast } = useToast();
   const navigate = useNavigate();
 
-  // Mock job data - in a real app, this would come from an API
-  const jobs: Job[] = [
-    {
-      id: 1,
-      title: "Senior Frontend Developer",
-      company: "TechCorp",
-      location: "Remote",
-      type: "Full-time",
-      salary: "$120k - $150k",
-      matchScore: 92,
-    },
-    {
-      id: 2,
-      title: "Full Stack Engineer",
-      company: "StartupX",
-      location: "San Francisco",
-      type: "Full-time",
-      salary: "$130k - $160k",
-      matchScore: 87,
-    },
-    {
-      id: 3,
-      title: "React Developer",
-      company: "InnovateLabs",
-      location: "New York",
-      type: "Contract",
-      salary: "$100k - $130k",
-      matchScore: 85,
-    },
-  ];
-
-  const handleJobClick = (jobId: number) => {
-    // Mark the jobs search step as completed when user interacts with jobs
+  const handleJobClick = (jobId: string) => {
     localStorage.setItem("jobsSearched", "true");
     toast({
       title: "Great choice!",
       description: "Click 'Apply Now' to start your application.",
     });
   };
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
+        <Header />
+        <main className="pt-24 pb-12 px-4">
+          <Card className="max-w-4xl mx-auto p-8">
+            <div className="text-center">
+              <h2 className="text-xl font-semibold text-red-600">Error Loading Jobs</h2>
+              <p className="text-gray-600 mt-2">{error}</p>
+            </div>
+          </Card>
+        </main>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
@@ -92,54 +69,73 @@ const Jobs = () => {
               </div>
 
               <div className="space-y-4">
-                {jobs.map((job) => (
-                  <Card
-                    key={job.id}
-                    className="p-6 hover:shadow-md transition-shadow cursor-pointer"
-                    onClick={() => handleJobClick(job.id)}
-                  >
-                    <div className="flex justify-between items-start">
-                      <div className="space-y-2">
-                        <h3 className="text-xl font-semibold">{job.title}</h3>
-                        <div className="space-y-1">
-                          <div className="flex items-center space-x-4 text-sm text-gray-600">
-                            <span className="flex items-center">
-                              <Building2Icon className="w-4 h-4 mr-1" />
-                              {job.company}
-                            </span>
-                            <span className="flex items-center">
-                              <MapPinIcon className="w-4 h-4 mr-1" />
-                              {job.location}
-                            </span>
-                          </div>
-                          <div className="flex items-center space-x-2">
-                            <span className="text-sm bg-primary/10 text-primary px-2 py-1 rounded">
-                              {job.type}
-                            </span>
-                            <span className="text-sm bg-success/10 text-success px-2 py-1 rounded">
-                              {job.salary}
-                            </span>
+                {isLoading ? (
+                  Array(3)
+                    .fill(0)
+                    .map((_, index) => (
+                      <Card key={index} className="p-6">
+                        <div className="space-y-3">
+                          <Skeleton className="h-6 w-2/3" />
+                          <div className="space-y-2">
+                            <Skeleton className="h-4 w-1/3" />
+                            <Skeleton className="h-4 w-1/4" />
                           </div>
                         </div>
+                      </Card>
+                    ))
+                ) : (
+                  jobs.map((job) => (
+                    <Card
+                      key={job.id}
+                      className="p-6 hover:shadow-md transition-shadow cursor-pointer"
+                      onClick={() => handleJobClick(job.id)}
+                    >
+                      <div className="flex justify-between items-start">
+                        <div className="space-y-2">
+                          <h3 className="text-xl font-semibold">{job.title}</h3>
+                          <div className="space-y-1">
+                            <div className="flex items-center space-x-4 text-sm text-gray-600">
+                              <span className="flex items-center">
+                                <Building2Icon className="w-4 h-4 mr-1" />
+                                {job.company}
+                              </span>
+                              <span className="flex items-center">
+                                <MapPinIcon className="w-4 h-4 mr-1" />
+                                {job.location}
+                              </span>
+                            </div>
+                            <div className="flex items-center space-x-2">
+                              <span className="text-sm bg-primary/10 text-primary px-2 py-1 rounded">
+                                {job.type}
+                              </span>
+                              <span className="text-sm bg-success/10 text-success px-2 py-1 rounded">
+                                ${job.salary_min / 1000}k - ${job.salary_max / 1000}k
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                        <div className="text-right">
+                          <span className="inline-block px-2 py-1 text-xs font-medium text-success bg-success/10 rounded-full">
+                            {job.matchScore}% Match
+                          </span>
+                        </div>
                       </div>
-                      <div className="text-right">
-                        <span className="inline-block px-2 py-1 text-xs font-medium text-success bg-success/10 rounded-full">
-                          {job.matchScore}% Match
-                        </span>
+                      <div className="mt-4">
+                        <p className="text-gray-600 text-sm line-clamp-2">{job.description}</p>
                       </div>
-                    </div>
-                    <div className="mt-4 flex justify-end">
-                      <Button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          navigate(`/apply/${job.id}`);
-                        }}
-                      >
-                        Apply Now
-                      </Button>
-                    </div>
-                  </Card>
-                ))}
+                      <div className="mt-4 flex justify-end">
+                        <Button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            navigate(`/apply/${job.id}`);
+                          }}
+                        >
+                          Apply Now
+                        </Button>
+                      </div>
+                    </Card>
+                  ))
+                )}
               </div>
             </div>
           </Card>
@@ -150,3 +146,4 @@ const Jobs = () => {
 };
 
 export default Jobs;
+
