@@ -4,24 +4,32 @@ import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
-import { useNavigate } from "react-router-dom";
-import { Search, Building2Icon, MapPinIcon, BriefcaseIcon } from "lucide-react";
+import { Building2Icon, MapPinIcon, BriefcaseIcon, Search } from "lucide-react";
 import { Header } from "@/components/Header";
 import { useJobs } from "@/hooks/useJobs";
+import { useApplications } from "@/hooks/useApplications";
 import { Skeleton } from "@/components/ui/skeleton";
 
 const Jobs = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const { jobs, isLoading, error } = useJobs(searchQuery);
+  const { applyToJob } = useApplications();
   const { toast } = useToast();
-  const navigate = useNavigate();
 
-  const handleJobClick = (jobId: string) => {
-    localStorage.setItem("jobsSearched", "true");
-    toast({
-      title: "Great choice!",
-      description: "Click 'Apply Now' to start your application.",
-    });
+  const handleApply = async (jobId: string) => {
+    try {
+      await applyToJob(jobId);
+      toast({
+        title: "Application Submitted",
+        description: "Your application has been successfully submitted!",
+      });
+    } catch (err) {
+      toast({
+        title: "Error",
+        description: "Failed to submit application. Please try again.",
+        variant: "destructive",
+      });
+    }
   };
 
   if (error) {
@@ -45,7 +53,7 @@ const Jobs = () => {
       <Header />
       <main className="pt-24 pb-12 px-4">
         <div className="max-w-4xl mx-auto">
-          <Card className="p-8 animate-in slide-in">
+          <Card className="p-8">
             <div className="flex items-center space-x-4 mb-8">
               <div className="p-3 bg-primary/10 rounded-full">
                 <BriefcaseIcon className="w-8 h-8 text-primary" />
@@ -70,26 +78,20 @@ const Jobs = () => {
 
               <div className="space-y-4">
                 {isLoading ? (
-                  Array(3)
-                    .fill(0)
-                    .map((_, index) => (
-                      <Card key={index} className="p-6">
-                        <div className="space-y-3">
-                          <Skeleton className="h-6 w-2/3" />
-                          <div className="space-y-2">
-                            <Skeleton className="h-4 w-1/3" />
-                            <Skeleton className="h-4 w-1/4" />
-                          </div>
+                  Array(3).fill(0).map((_, index) => (
+                    <Card key={index} className="p-6">
+                      <div className="space-y-3">
+                        <Skeleton className="h-6 w-2/3" />
+                        <div className="space-y-2">
+                          <Skeleton className="h-4 w-1/3" />
+                          <Skeleton className="h-4 w-1/4" />
                         </div>
-                      </Card>
-                    ))
+                      </div>
+                    </Card>
+                  ))
                 ) : (
                   jobs.map((job) => (
-                    <Card
-                      key={job.id}
-                      className="p-6 hover:shadow-md transition-shadow cursor-pointer"
-                      onClick={() => handleJobClick(job.id)}
-                    >
+                    <Card key={job.id} className="p-6 hover:shadow-md transition-shadow">
                       <div className="flex justify-between items-start">
                         <div className="space-y-2">
                           <h3 className="text-xl font-semibold">{job.title}</h3>
@@ -124,12 +126,7 @@ const Jobs = () => {
                         <p className="text-gray-600 text-sm line-clamp-2">{job.description}</p>
                       </div>
                       <div className="mt-4 flex justify-end">
-                        <Button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            navigate(`/apply/${job.id}`);
-                          }}
-                        >
+                        <Button onClick={() => handleApply(job.id)}>
                           Apply Now
                         </Button>
                       </div>
@@ -146,4 +143,3 @@ const Jobs = () => {
 };
 
 export default Jobs;
-
