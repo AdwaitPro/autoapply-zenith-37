@@ -9,6 +9,7 @@ import Index from "./pages/Index";
 import AuthPage from "./pages/auth/AuthPage";
 import Profile from "./pages/Profile";
 import Resume from "./pages/Resume";
+import TailoredResume from "./pages/TailoredResume";
 import Jobs from "./pages/Jobs";
 import Applications from "./pages/Applications";
 import NotFound from "./pages/NotFound";
@@ -54,6 +55,14 @@ const App = () => {
               element={
                 <ProtectedRoute>
                   <Resume />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/tailored-resume"
+              element={
+                <ProtectedRoute>
+                  <TailoredResume />
                 </ProtectedRoute>
               }
             />

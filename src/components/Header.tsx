@@ -1,5 +1,5 @@
 
-import { BriefcaseIcon } from "lucide-react";
+import { BriefcaseIcon, FileText } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 
 export const Header = () => {
@@ -36,6 +36,22 @@ export const Header = () => {
             }`}
           >
             Applications
+          </Link>
+          <Link 
+            to="/resume" 
+            className={`text-sm font-medium transition-colors ${
+              location.pathname === "/resume" ? "text-primary" : "text-gray-600 hover:text-gray-900"
+            }`}
+          >
+            Resume
+          </Link>
+          <Link 
+            to="/tailored-resume" 
+            className={`text-sm font-medium transition-colors ${
+              location.pathname === "/tailored-resume" ? "text-primary" : "text-gray-600 hover:text-gray-900"
+            }`}
+          >
+            Tailored Resume
           </Link>
           <Link 
             to="/profile" 
