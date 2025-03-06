@@ -17,7 +17,7 @@ const COMMON_KEYWORDS = [
   'project', 'team', 'created', 'built', 'designed', 'analyzed', 'solved',
   'improved', 'increased', 'decreased', 'achieved', 'coordinated', 'led',
   'collaborated', 'organized', 'certified', 'javascript', 'react', 'node', 'typescript',
-  'python', 'java', 'c++', 'aws', 'cloud', 'agile', 'scrum', 'git', 'api',
+  'python', 'java', 'c\\+\\+', 'aws', 'cloud', 'agile', 'scrum', 'git', 'api',
   'database', 'sql', 'nosql', 'mongodb', 'frontend', 'backend', 'fullstack'
 ];
 
@@ -29,6 +29,13 @@ const FORMAT_ISSUES = [
   { regex: /\u00A0/g, issue: 'Non-breaking spaces can cause parsing issues' },
   { regex: /\[\s*image\s*\]/i, issue: 'Image placeholders are not parsed by ATS systems' },
 ];
+
+/**
+ * Escapes special regex characters in a string
+ */
+const escapeRegExp = (string: string): string => {
+  return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+};
 
 /**
  * Calculates an ATS compatibility score for the provided resume text
@@ -43,9 +50,11 @@ export const scoreResume = async (file: File): Promise<ATSFeedback> => {
   const suggestions: string[] = [];
   
   // Check keyword density
-  const keywordMatches = COMMON_KEYWORDS.filter(keyword => 
-    new RegExp(`\\b${keyword}\\b`, 'i').test(resumeText)
-  );
+  const keywordMatches = COMMON_KEYWORDS.filter(keyword => {
+    // Create a regex with word boundaries that safely handles special characters
+    const safeKeyword = keyword; // Already escaped in the COMMON_KEYWORDS array
+    return new RegExp(`\\b${safeKeyword}\\b`, 'i').test(resumeText);
+  });
   
   const keywordScore = Math.min(100, Math.round((keywordMatches.length / 15) * 100));
   
