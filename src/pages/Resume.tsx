@@ -4,12 +4,16 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
 import { useNavigate } from "react-router-dom";
-import { FileText, Upload, FileType, CheckCircle, X } from "lucide-react";
+import { FileText, Upload, FileType, CheckCircle, X, BarChart } from "lucide-react";
 import { Header } from "@/components/Header";
+import { scoreResume, ATSFeedback } from "@/utils/atsScorer";
+import { ATSScoreCard } from "@/components/ATSScoreCard";
 
 const Resume = () => {
   const [file, setFile] = useState<File | null>(null);
   const [isDragging, setIsDragging] = useState(false);
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [atsResult, setAtsResult] = useState<ATSFeedback | null>(null);
   const { toast } = useToast();
   const navigate = useNavigate();
 
@@ -62,6 +66,30 @@ const Resume = () => {
     }
 
     setFile(file);
+    setAtsResult(null); // Reset ATS result when a new file is uploaded
+  };
+
+  const analyzeResume = async () => {
+    if (!file) return;
+    
+    setIsAnalyzing(true);
+    try {
+      const result = await scoreResume(file);
+      setAtsResult(result);
+      toast({
+        title: "Resume analyzed",
+        description: `Your resume has an ATS compatibility score of ${result.score}%`,
+      });
+    } catch (error) {
+      console.error("Error analyzing resume:", error);
+      toast({
+        title: "Analysis failed",
+        description: "There was an error analyzing your resume. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsAnalyzing(false);
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -82,7 +110,7 @@ const Resume = () => {
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
       <Header />
       <main className="pt-24 pb-12 px-4">
-        <div className="max-w-2xl mx-auto">
+        <div className="max-w-3xl mx-auto">
           <Card className="p-8 animate-in slide-in">
             <div className="flex items-center space-x-4 mb-8">
               <div className="p-3 bg-primary/10 rounded-full">
@@ -90,7 +118,7 @@ const Resume = () => {
               </div>
               <div>
                 <h1 className="text-2xl font-bold">Upload Your Resume</h1>
-                <p className="text-gray-500">Upload your resume to get started</p>
+                <p className="text-gray-500">Upload your resume to get started and check ATS compatibility</p>
               </div>
             </div>
 
@@ -151,6 +179,19 @@ const Resume = () => {
                 </div>
               )}
 
+              {file && !atsResult && (
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="w-full"
+                  onClick={analyzeResume}
+                  disabled={isAnalyzing}
+                >
+                  <BarChart className="w-4 h-4 mr-2" />
+                  {isAnalyzing ? "Analyzing Resume..." : "Check ATS Compatibility"}
+                </Button>
+              )}
+
               <Button
                 type="submit"
                 className="w-full"
@@ -160,6 +201,12 @@ const Resume = () => {
                 Upload Resume
               </Button>
             </form>
+
+            {atsResult && (
+              <div className="mt-8">
+                <ATSScoreCard result={atsResult} />
+              </div>
+            )}
           </Card>
         </div>
       </main>
